@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Install Archforge
+GenericName=System Installer
+Comment=Install Archforge on this computer
+TryExec=/usr/bin/calamares
+Exec=sudo /usr/bin/calamares
+Icon=calamares
+Terminal=false
+StartupNotify=true
+Categories=System;

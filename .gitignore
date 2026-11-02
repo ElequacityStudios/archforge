@@ -1,0 +1,6 @@
+/out/
+/work/
+*.iso
+*.iso.sig
+*.log
+.DS_Store

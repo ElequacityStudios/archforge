@@ -1,0 +1,12 @@
+# remove from airootfs!
+
+[Trigger]
+Operation = Install
+Type = Package
+Target = base
+
+[Action]
+Description = Creating live user...
+When = PostTransaction
+Depends = shadow
+Exec = /usr/bin/useradd -m -u 1000 -G wheel -s /bin/bash -p '' liveuser

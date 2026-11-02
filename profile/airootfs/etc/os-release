@@ -1,0 +1,11 @@
+NAME="Archforge"
+PRETTY_NAME="Archforge"
+ID=archforge
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;100;120;255"
+HOME_URL=""
+DOCUMENTATION_URL=""
+SUPPORT_URL=""
+BUG_REPORT_URL=""
+LOGO=archforge

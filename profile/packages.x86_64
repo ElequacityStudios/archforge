@@ -28,6 +28,7 @@ ethtool
 exfatprogs
 f2fs-tools
 fatresize
+fastfetch
 foot-terminfo
 fsarchiver
 ghostty-terminfo
@@ -141,7 +142,6 @@ calamares
 plasma-workspace-wallpapers
 gparted
 partitionmanager
-gnome-disk-utility
 inxi
 hwinfo
 lshw

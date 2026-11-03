@@ -5,8 +5,8 @@ Name=Install Archforge
 GenericName=System Installer
 Comment=Install Archforge on this computer
 TryExec=/usr/bin/calamares
-Exec=sudo /usr/bin/calamares
-Icon=calamares
+Exec=QT_QPA_PLATFORMTHEME=kde QT_STYLE_OVERRIDE=Breeze QT_QUICK_CONTROLS_STYLE=org.kde.desktop sudo /usr/bin/calamares
+Icon=archforge
 Terminal=false
 StartupNotify=true
 Categories=System;

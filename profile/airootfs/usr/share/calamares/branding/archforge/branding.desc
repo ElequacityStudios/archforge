@@ -163,10 +163,10 @@ strings:
 # These filenames can also use substitutions from os-release (see above).
 images:
     # productBanner:       "banner.png"
-    productIcon:         "squid.png"
-    productLogo:         "squid.png"
+    productIcon:         "archforge.png"
+    productLogo:         "archforge.png"
     # productWallpaper:    "wallpaper.png"
-    productWelcome:      "languages.png"
+    productWelcome:      "archforge.png"
 
 # Colors for text and background components.
 #
@@ -203,7 +203,7 @@ style:
 #   slideshow:               "show.qml"
 # To configure images, like the filenames (here, as an inline list):
 #   slideshow: [ "/etc/calamares/slideshow/0.png", "/etc/logo.png" ]
-slideshow:               "show.qml"
+slideshow:              [ "/usr/share/calamares/branding/archforge/slideshow/1.png", "/usr/share/calamares/branding/archforge/slideshow/2.png", "/usr/share/calamares/branding/archforge/slideshow/3.png", "/usr/share/calamares/branding/archforge/slideshow/4.png" ]
 
 # There are two available APIs for a QML slideshow:
 #  - 1 (the default) loads the entire slideshow when the installation-

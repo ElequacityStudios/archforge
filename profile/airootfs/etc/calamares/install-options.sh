@@ -1,11 +1,21 @@
-
 #!/usr/bin/bash
 set -Eeuo pipefail
 
 gpu_selection="${1-}"
-software_selection="${2-}"
-target="${3:?Missing installation root}"
+target="${2:?Missing installation root}"
+
 config="/etc/calamares/target-pacman.conf"
+
+# Set the GRUB distribution name.
+if [[ -f "$target/etc/default/grub" ]]; then
+    sed -i '/^GRUB_DISTRIBUTOR=/d' "$target/etc/default/grub"
+    printf '%s\n' 'GRUB_DISTRIBUTOR="Archforge"' >> "$target/etc/default/grub"
+fi
+
+# Make the Paru NetInstall script available inside the installed system.
+ /usr/bin/install -D -m 0755 \
+    /etc/calamares/install-paru-netinstall.sh \
+    "$target/usr/local/lib/archforge/install-paru-netinstall.sh"
 
 contains() {
     [[ ",$1," == *",$2,"* ]]
@@ -30,6 +40,50 @@ EOF
 }
 
 enable_target_multilib
+
+# Ensure DNS works inside the target for Calamares' packages module.
+resolver=""
+
+for candidate in \
+    /run/systemd/resolve/resolv.conf \
+    /run/NetworkManager/resolv.conf \
+    /etc/resolv.conf; do
+
+    if [[ -s "$candidate" ]] &&
+       /usr/bin/awk '
+           $1 == "nameserver" && $2 !~ /^(127\.|::1$)/ {
+               found = 1
+           }
+           END { exit !found }
+       ' "$candidate"; then
+        resolver="$candidate"
+        break
+    fi
+done
+
+# Replace any target-side stub resolver with usable DNS servers.
+rm -f "$target/etc/resolv.conf"
+
+if [[ -n "$resolver" ]]; then
+    /usr/bin/awk '
+        $1 == "nameserver" {
+            if ($2 !~ /^(127\.|::1$)/)
+                print
+            next
+        }
+
+        $1 == "search" || $1 == "domain" || $1 == "options" {
+            print
+        }
+    ' "$resolver" > "$target/etc/resolv.conf"
+else
+    printf '%s\n' \
+        'nameserver 1.1.1.1' \
+        'nameserver 9.9.9.9' \
+        > "$target/etc/resolv.conf"
+fi
+
+chmod 0644 "$target/etc/resolv.conf"
 
 declare -A added=()
 packages=()
@@ -62,6 +116,17 @@ add_nouveau() {
 
 add_nvidia() {
     add_packages nvidia-open nvidia-utils lib32-nvidia-utils opencl-nvidia lib32-opencl-nvidia nvidia-settings nvidia-prime
+}
+
+# Install Paru when required by a legacy NVIDIA driver.
+install_paru() {
+    if /usr/bin/arch-chroot "$target" /usr/bin/pacman -Q paru >/dev/null 2>&1; then
+        echo "Paru is already installed."
+        return 0
+    fi
+
+    echo "Building and installing Paru."
+    /usr/bin/bash /etc/calamares/install-paru.sh "$target"
 }
 
 install_legacy_nvidia() {
@@ -209,12 +274,7 @@ if ((${#packages[@]})); then
     /usr/bin/pacstrap -C "$config" "$target" "${packages[@]}"
 fi
 
-# Install the selected legacy NVIDIA driver.
-if ((nvidia_branch_count == 1)); then
-    install_legacy_nvidia "$selected_nvidia_branch"
-fi
-
-# Always install Steam after the graphics providers.
+# Install software Vulkan fallback if no usable provider was selected.
 if [[ -z "${added[vulkan-radeon]+x}" &&
       -z "${added[vulkan-intel]+x}" &&
       -z "${added[vulkan-virtio]+x}" &&
@@ -225,11 +285,19 @@ if [[ -z "${added[vulkan-radeon]+x}" &&
     /usr/bin/pacstrap -C "$config" "$target" vulkan-swrast lib32-vulkan-swrast
 fi
 
+# Install Paru temporarily when required by a legacy NVIDIA driver.
+if ((nvidia_branch_count == 1)); then
+    install_paru
+fi
+
+# Install the selected legacy NVIDIA driver.
+if ((nvidia_branch_count == 1)); then
+    install_legacy_nvidia "$selected_nvidia_branch"
+fi
+
 if [[ "$selected_nvidia_branch" == "390" ||
       "$selected_nvidia_branch" == "340" ]]; then
     echo "WARNING: NVIDIA ${selected_nvidia_branch}xx does not provide Vulkan." >&2
 fi
 
-echo "Installing Steam."
-/usr/bin/pacstrap -C "$config" "$target" steam
-
+echo "Archforge graphics installation completed."

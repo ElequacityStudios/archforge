@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="assets/branding/archforge.png" alt="Archforge Logo" width="180">
+</p>
+
 # Archforge
 An Arch based linux distribution focused on bringing a more open OS to PCs and handheld devices.
 

@@ -7,6 +7,10 @@ config="/etc/calamares/target-pacman.conf"
 case "$desktop" in
   kde)
     /usr/bin/pacstrap -C "$config" -K "$root" plasma-meta plasma-workspace-wallpapers plasma-login-manager plasma-setup-git dolphin konsole xdg-desktop-portal-kde
+    /usr/bin/kwriteconfig6 \
+      --file "$root/etc/xdg/plasmarc" \
+      --group Wallpaper \
+      --key defaultWallpaperTheme Elarun
     /usr/bin/systemd-sysusers --root="$root"
     /usr/bin/systemctl --root="$root" enable plasmalogin.service plasma-setup.service
     ;;
